@@ -1,0 +1,28 @@
+{
+  "name": "overengineered-calculator",
+  "version": "1.0.0",
+  "description": "Need a calculator? Try this one, written in node/express. Our answers are better!",
+  "main": "index.js",
+  "scripts": {
+    "test": "test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/killthrush/overengineered-calculator.git"
+  },
+  "keywords": [
+    "hack"
+  ],
+  "author": "Ben Peterson",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/killthrush/overengineered-calculator/issues"
+  },
+  "homepage": "https://github.com/killthrush/overengineered-calculator#readme",
+  "dependencies": {
+    "express": "^4.14.1"
+  },
+  "devDependencies": {
+    "babel-eslint": "^7.1.1"
+  }
+}
