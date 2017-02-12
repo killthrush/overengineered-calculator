@@ -1,6 +1,7 @@
 const express = require('express')
 const bodyParser = require('body-parser')
-const cache = require('memory-cache');
+const cache = require('memory-cache')
+const Expression = require('./helpers/expression')
 const util = require('util')
 
 const app = express()
@@ -8,7 +9,6 @@ const port = 9002
 
 app.use(bodyParser.json())
 app.use(bodyParser.urlencoded({ extended: true }))
-
 app.use(function (err, request, response, next) {
   console.error(err.stack)
   response.sendStatus(500)
@@ -23,30 +23,27 @@ app.get('/expressions/:expression', (request, response) => {
 app.put('/expressions', (request, response, next) => {
   console.log(`Hit route ${request.path}`)
   if (!request.body || !request.body.expression) {
-    console.log(`Expression not supplied - body is: ${request.body}`)
-    response.sendStatus(400)
-    return next()
-  }
-  const expression = request.body.expression
-  if (!expressionIsValid(expression)) {
-    console.log(`Expression not valid: ${expression}`)
+    console.error(`Expression not supplied - body is: ${request.body}`)
     response.sendStatus(400)
     return next()
   }
 
-  let answer = cache.get(expression) // Kinda silly, but suppose this was an expensive function?
-  const isNewExpression = (answer === null)
+  const expressionString = request.body.expression
+  let expressionObj = cache.get(expressionString) // Kinda silly, but suppose this was an expensive function?
+  const isNewExpression = (expressionObj === null)
   if (isNewExpression) {
-    // A bit dangerous perhaps...this could overflow or div/0 or worse
-    eval(`answer = ${expression}`)
-    cache.put(expression, answer) // TODO: make sure we normalize all equivalent expressions
-    console.log(`Cached expression ${expression}.`)
+    expressionObj = new Expression(expressionString)
+    cache.put(expressionString, expressionObj)
+    console.log(`Cached expression ${expressionString}.`)
   }
-  const returnValue = {
-    expression: expression,
-    answer: answer,
-    friendlyText: `${expression} is ${answer}`
+
+  if (!expressionObj.isValid) {
+    console.error(`Expression not valid: ${expressionString}`)
+    response.sendStatus(400)
+    return next()
   }
+
+  const returnValue = expressionObj.toObj()
   console.log(returnValue)
   let returnCode = 200
   if (isNewExpression) {
@@ -58,13 +55,3 @@ app.put('/expressions', (request, response, next) => {
 app.listen(port, () => {
   console.log(`Listening on port ${port}...`)
 })
-
-function expressionIsValid(expression) {
-  // Built here: https://regex101.com/r/eqXHW0/1
-  // TODO: move these unit tests here?
-  // https://regex101.com/delete/aMbEoFI9ZJQu7cOq3JOyEdia
-  const pattern = /^\d+\.?\d*[ ]*[\+\-\/\*\%][ ]*\d+\.?\d*$/
-  const re = RegExp(pattern, 'g')
-  return expression && re.test(expression)
-}
-

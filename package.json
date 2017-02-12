@@ -4,7 +4,7 @@
   "description": "Need a calculator? Try this one, written in node/express. Our answers are better!",
   "main": "index.js",
   "scripts": {
-    "test": "test"
+    "test": "mocha ./tests/**/*.tests.js --opts ./mocha.opts"
   },
   "repository": {
     "type": "git",
@@ -23,7 +23,14 @@
     "express": "^4.14.1"
   },
   "devDependencies": {
+    "babel-cli": "^6.22.2",
+    "babel-core": "^6.22.1",
     "babel-eslint": "^7.1.1",
-    "body-parser": "^1.16.1"
+    "babel-preset-es2017": "^6.22.0",
+    "body-parser": "^1.16.1",
+    "chai": "^3.5.0",
+    "mocha": "^3.2.0",
+    "sinon": "^1.17.7",
+    "sinon-chai": "^2.8.0"
   }
 }
