@@ -1,5 +1,6 @@
 const express = require('express')
 const bodyParser = require('body-parser')
+const cache = require('memory-cache');
 const util = require('util')
 
 const app = express()
@@ -33,12 +34,25 @@ app.put('/expressions', (request, response, next) => {
     return next()
   }
 
-  // A bit dangerous perhaps...this could overflow or div/0
-  let answer
-  eval(`answer = ${expression}`)
-  const returnValue = `${expression} is ${answer}`
+  let answer = cache.get(expression) // Kinda silly, but suppose this was an expensive function?
+  const isNewExpression = (answer === null)
+  if (isNewExpression) {
+    // A bit dangerous perhaps...this could overflow or div/0 or worse
+    eval(`answer = ${expression}`)
+    cache.put(expression, answer) // TODO: make sure we normalize all equivalent expressions
+    console.log(`Cached expression ${expression}.`)
+  }
+  const returnValue = {
+    expression: expression,
+    answer: answer,
+    friendlyText: `${expression} is ${answer}`
+  }
   console.log(returnValue)
-  response.send(returnValue)
+  let returnCode = 200
+  if (isNewExpression) {
+    returnCode = 201
+  }
+  response.status(returnCode).send(returnValue)
 })
 
 app.listen(port, () => {
